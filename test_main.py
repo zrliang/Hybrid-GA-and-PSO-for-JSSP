@@ -24,8 +24,8 @@ setup_time = pd.read_excel("./semiconductor_data(5lot).xlsx", sheet_name=3, inde
 
 # Normal
 ## GA
-population_size=1
-num_iteration =10
+population_size=2
+num_iteration =4
 crossover_rate=1    
 mutation_rate=1     
 
@@ -58,42 +58,55 @@ for i in range(len(tool.values)):
 
 # initialize the velocity
 v1 = np.zeros((population_size,len(jobs)*2))
-
+v2 =np.copy(v1)
 #-------------------- fitness value -------------------------------------
+pbest=deepcopy(chromosomes) #11111111111111111111111111
 
-for k in range(len(chromosomes)):
-    chromosomes[k].clear_values()
+def fitness(chromosomes,jobs,machines):
+    for k in range(len(chromosomes)):
+        chromosomes[k].clear_values()
 
-    # job set_probability
-    for j in range(len(jobs)):
-        jobs[j].set_probability(chromosomes[k].get_probability(j)) 
+        # job set_probability
+        for j in range(len(jobs)):
+            jobs[j].set_probability(chromosomes[k].get_probability(j)) 
 
-    # machine action
-    for i in range(len(machines)):
-        machines[i].add_job(jobs)
-        machines[i].sort_job()     
-        machines[i].calculate_process_time(setup_time)     
+        # machine action
+        for i in range(len(machines)):
+            machines[i].add_job(jobs)
+            machines[i].sort_job()     
+            machines[i].calculate_process_time(setup_time)     
+            # record makespan & tardiness_num
+            # record makespan
+            if machines[i].endTime > chromosomes[k].makespan :
+                chromosomes[k].makespan=machines[i].endTime
+            # record tardiness_num
+            for j in range(len(machines[i].sorted_jobs)): 
+                if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
+                    chromosomes[k].tardiness_num+=1
 
-        # record makespan & tardiness_num
-        # record makespan
-        if machines[i].endTime > chromosomes[k].makespan :
-            chromosomes[k].makespan=machines[i].endTime
-        # record tardiness_num
-        for j in range(len(machines[i].sorted_jobs)): 
-            if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
-                chromosomes[k].tardiness_num+=1
+            machines[i].clear_job()    
 
-        machines[i].clear_job()    
+    for t in range(len(chromosomes)):
+        chromosomes[t].target_value= 0.01* chromosomes[t].makespan + 0.99*chromosomes[t].tardiness_num
 
-for t in range(len(chromosomes)):
-    chromosomes[t].target_value= 0.01* chromosomes[t].makespan + 0.99*chromosomes[t].tardiness_num
+    #排序，依target_value
+    sorted_chromosomes = sorted(chromosomes, key=lambda e:e.target_value, reverse = False) #小到大
 
-#排序，依target_value
-sorted_chromosomes = sorted(chromosomes, key=lambda e:e.target_value, reverse = False) #小到大
+    for p in range(len(chromosomes)):
+        if chromosomes[p].target_value< pbest[p].target_value :
+            pbest[p] = deepcopy(chromosomes[p])
+
+    if sorted_chromosomes[0].target_value< gbest.target_value :
+        gbest = sorted_chromosomes[0]
+
+    return sorted_chromosomes
+
 
 # record initial pbest & gbest
-pbest=deepcopy(chromosomes)
+# pbest=deepcopy(chromosomes)
+# gbest=fitness(chromosomes,jobs,machines)[0]
 gbest=sorted_chromosomes[0]
+
 
 # # print(len(chromosomes),chromosomes[0].probability[0])
 # # print(len(pbest),pbest[0].probability[0])
@@ -105,38 +118,48 @@ gbest=sorted_chromosomes[0]
 
 #----------------Termination Criteria -----------------------------------
 
-#for x in range(num_iteration-1): # minus first time
+for x in range(num_iteration-1): # minus first time
 
 #--------------Update v & x -----------
-v2 =np.copy(v1)
 
-chromosomes2 =deepcopy(chromosomes)
+    chromosomes2 =deepcopy(chromosomes)
 
-for i in range(population_size):
-    for j in range(len(jobs)*2):
-        x1 = chromosomes[i].probability[j]
-        x2 = chromosomes2[i].probability[j]
-        #v2[i][j] = w * v1[i][j] + c1 *random.random()* (pbest[i].probability[j] - x1) + c2*random.random()*( gbest.probability[j] - x1)
-        v2[i][j]=1
-        #chromosomes2[i].probability[j]=chromosomes[i].probability[j]+v2[i][j]
-        if chromosomes2[i].probability[j]<=0 :
-            chromosomes2[i].probability[j]=0
-        elif chromosomes2[i].probability[j]>=1 :
-            chromosomes2[i].probability[j]=1
+    for i in range(population_size):
+        for j in range(len(jobs)*2):
+            x1 = chromosomes[i].probability[j]
+            x2 = chromosomes2[i].probability[j]
+            v2[i][j] = w * v1[i][j] + c1 *random.random()* (pbest[i].probability[j] - x1) + c2*random.random()*( gbest.probability[j] - x1)
+            x2=x1+v2[i][j]
+            if x2<=0 :
+                x2=0.000001
+            elif x2>=1 :
+                x2=0.99999
+            chromosomes2[i].probability[j] =x2
 
-for i in range(population_size):
-    for j in range(len(jobs)*2): 
-        print(chromosomes[i].probability[j])  
-print("/")       
-for i in range(population_size):
-    for j in range(len(jobs)*2): 
-        print(chromosomes2[i].probability[j])   
+    # for i in range(population_size):
+    #     for j in range(len(jobs)*2): 
+    #         print(chromosomes[i].probability[j])  
+
+    # print("/")   
+    # print("V2",v2)
+    # print("V1",v1)
+
+    chromosomes=[]
+    v1 =np.copy(v2)
+
+    for i in range(population_size):
+        chromosomes.append(chromosomes2[i])
+
+    # for i in range(population_size):
+    #     for j in range(len(jobs)*2): 
+    #         print(chromosomes[i].probability[j])  
+    # print("/")       
 
 
-# pass
-print(v2)
 
-
+#     chromosomes=[]
+#     for i in range(elite_selection_size):
+#         chromosomes.append(sorted_total_chromosomes[i])
 
 
 
