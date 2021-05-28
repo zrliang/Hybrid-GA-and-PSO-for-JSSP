@@ -125,14 +125,4 @@ def rank_selection_get_select_index(proba_list,rank_selection_num):
     return select_index
 
 
-a=1
-b=2
-def A(a,b):
-    a=2
-    b=3
-    return b
-A(a,b)
-
-print(a,b)
-
 
