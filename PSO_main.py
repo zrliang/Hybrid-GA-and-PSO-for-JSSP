@@ -24,8 +24,8 @@ setup_time = pd.read_excel("./semiconductor_data.xlsx", sheet_name=3, index_col=
 
 # Normal
 ## GA
-population_size=10
-num_iteration =3
+population_size=50
+num_iteration =500
   
 ## PSO
 w=0.5
@@ -164,29 +164,29 @@ plt.ylabel('target_value',fontsize=15)
 plt.xlabel('generation',fontsize=15)
 plt.show()
 
-# #甘特圖
-# #時間限制(超過24hr:1440 分)
-# df=[]
-# for i in range(len(machines)):
-#     for j in range(len(machines[i].sorted_jobs)): 
+#甘特圖
+#時間限制(超過24hr:1440 分)
+df=[]
+for i in range(len(machines)):
+    for j in range(len(machines[i].sorted_jobs)): 
 
-#         # if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
-#         #     df.append(
-#         #     dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
-#         #     Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
-#         #     Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
-#         #     Recipe='broken',
-#         #     Machine=machines[i].EQP_ID))
+        if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
+            df.append(
+            dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
+            Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
+            Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
+            Recipe='broken',
+            Machine=machines[i].EQP_ID))
     
-#         # else:
-#         df.append(
-#         dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
-#         Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
-#         Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
-#         Recipe=machines[i].sorted_jobs[j].RECIPE,
-#         Machine=machines[i].EQP_ID))
+        else:
+            df.append(
+            dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
+            Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
+            Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
+            Recipe=machines[i].sorted_jobs[j].RECIPE,
+            Machine=machines[i].EQP_ID))
 
 
-# #呈現圖表
-# fig1 = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", color="Recipe",text="Task")
-# fig1.show()
+#呈現圖表
+fig1 = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", color="Recipe",text="Task")
+fig1.show()

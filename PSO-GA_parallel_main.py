@@ -24,11 +24,10 @@ setup_time = pd.read_excel("./semiconductor_data.xlsx", sheet_name=3, index_col=
 
 # Normal
 
-
-population_size=10
+population_size=50
 
 ## GA
-num_iteration =3
+num_iteration =500
 crossover_rate=1    
 mutation_rate=1     
 
@@ -103,12 +102,6 @@ sorted_chromosomes = sorted(chromosomes, key=lambda e:e.target_value, reverse = 
 pbest=deepcopy(chromosomes)
 gbest=deepcopy(sorted_chromosomes[0])
 
-# for i in range(5):
-#     print(pbest[i].probability)
-# print("---")
-# print(gbest.target_value)
-# print("---")
-
 #----------------Termination Criteria -----------------------------------
 MakespanRecord=[] 
 
@@ -116,33 +109,44 @@ for x in range(num_iteration-1): # minus first time
 
 #--------------Update v & x -----------
 
-    chromosomes2 =deepcopy(chromosomes)
+    PSO_chromosomes = deepcopy(chromosomes[:PSO_size])
+    GA_chromosomes = deepcopy(chromosomes[GA_size:])
+
+    PSO_chromosomes2 =deepcopy(PSO_chromosomes)
 
     # 前半PSO
     for i in range(PSO_size):
         for j in range(len(jobs)*2):
-            x1 = chromosomes[i].probability[j]
-            x2 = chromosomes2[i].probability[j]
+            x1 = PSO_chromosomes[i].probability[j]
+            x2 = PSO_chromosomes2[i].probability[j]
             v2[i][j] = w * v1[i][j] + c1 *random.random()* (pbest[i].probability[j] - x1) + c2*random.random()*( gbest.probability[j] - x1)
             x2=x1+v2[i][j]
             if x2<=0 :
                 x2=0.00001
             elif x2>=1 :
                 x2=0.99999
-            chromosomes2[i].probability[j] =x2
+            PSO_chromosomes2[i].probability[j] =x2
 
     # 後半 crossover & mutation 
 
-        # GA_size
-        for i in range(GA_size):
-            pass
+    # GA_size
+
+    parent_list = deepcopy(GA_chromosomes)
+    offspring_list= deepcopy(GA_chromosomes)
+
+    #------------------------Crossover------------------------------------
+    offspring_list = Crossover(parent_list,offspring_list,GA_size,len(jobs),crossover_rate)
+
+    #------------------------Mutation------------------------------------
+    offspring_list = mutation(GA_size,offspring_list,mutation_rate,len(jobs))
 
     # combine two of above 
     chromosomes=[]
     v1 =np.copy(v2)
 
-    for i in range(population_size):
-        chromosomes.append(chromosomes2[i])
+    chromosomes=deepcopy(PSO_chromosomes2)+deepcopy(offspring_list)
+
+    #-----------------------------------------------------------
     
     chromosomes=fitness(chromosomes,jobs,machines)
     #排序，依target_value
