@@ -20,24 +20,24 @@ start_import = time.process_time()
 wip = pd.read_excel("./semiconductor_data.xlsx", sheet_name=2, dtype=str)
 eqp = pd.read_excel("./semiconductor_data.xlsx", sheet_name=0, dtype=str)
 tool = pd.read_excel("./semiconductor_data.xlsx", sheet_name=1, dtype=str)
-setup_time = pd.read_excel("./semiconductor_data.xlsx", sheet_name=3, index_col=0) #index can sue
+setup_time = pd.read_excel("./semiconductor_data.xlsx", sheet_name=3, index_col=0) # index can use
 
 # Normal
-
 population_size=50
+num_iteration =300
 
 ## GA
-num_iteration =500
 crossover_rate=1    
 mutation_rate=1     
 
 ## PSO
-w=0.5
-c1=2
-c2=2
+w=0.5            
+c1=2          
+c2=2           
 
-PSO_size = int(population_size/2)
-GA_size = population_size -PSO_size
+## GA & PSO size
+PSO_size = int(population_size/2)            
+GA_size = population_size -PSO_size             
 
 # Selection setting (roulette_wheel) 
 elite_selection_size=int(population_size*0.2) 
@@ -89,9 +89,7 @@ def fitness(chromosomes,jobs,machines):
 
             machines[i].clear_job()    
     
-    # caculate targetvalue
-    for t in range(len(chromosomes)):
-        chromosomes[t].target_value= 0.01* chromosomes[t].makespan + 0.99*chromosomes[t].tardiness_num
+        chromosomes[k].target_value= 1 * chromosomes[k].makespan + 0 * chromosomes[k].tardiness_num
 
     return chromosomes
 
@@ -233,7 +231,6 @@ for x in range(num_iteration-1): # minus first time
 #     MakespanRecord.append(chromosomes[0].target_value)
   
 
-
 # # -----------------Result----------------------
 
 # ## final job & machine condition
@@ -248,6 +245,8 @@ for i in range(len(machines)):
     machines[i].sort_job()     
     machines[i].calculate_process_time(setup_time)    
 
+print("PSO_GA.py")
+print(num_iteration,"代")
 print("tardiness=",gbest.tardiness_num)
 print("makespan=",gbest.makespan)
 print("target_value=",gbest.target_value)
@@ -275,29 +274,29 @@ plt.ylabel('target_value',fontsize=15)
 plt.xlabel('generation',fontsize=15)
 plt.show()
 
-# #甘特圖
-# #時間限制(超過24hr:1440 分)
-# df=[]
-# for i in range(len(machines)):
-#     for j in range(len(machines[i].sorted_jobs)): 
+#甘特圖
+#時間限制(超過24hr:1440 分)
+df=[]
+for i in range(len(machines)):
+    for j in range(len(machines[i].sorted_jobs)): 
 
-#         # if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
-#         #     df.append(
-#         #     dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
-#         #     Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
-#         #     Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
-#         #     Recipe='broken',
-#         #     Machine=machines[i].EQP_ID))
+        # if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
+        #     df.append(
+        #     dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
+        #     Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
+        #     Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
+        #     Recipe='broken',
+        #     Machine=machines[i].EQP_ID))
     
-#         # else:
-#         df.append(
-#         dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
-#         Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
-#         Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
-#         Recipe=machines[i].sorted_jobs[j].RECIPE,
-#         Machine=machines[i].EQP_ID))
+        # else:
+        df.append(
+        dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
+        Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
+        Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
+        Recipe=machines[i].sorted_jobs[j].RECIPE,
+        Machine=machines[i].EQP_ID))
 
 
-# #呈現圖表
-# fig1 = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", color="Recipe",text="Task")
-# fig1.show()
+#呈現圖表
+fig1 = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", color="Recipe",text="Task")
+fig1.show()

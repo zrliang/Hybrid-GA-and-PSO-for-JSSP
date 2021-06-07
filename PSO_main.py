@@ -22,12 +22,9 @@ eqp = pd.read_excel("./semiconductor_data.xlsx", sheet_name=0, dtype=str)
 tool = pd.read_excel("./semiconductor_data.xlsx", sheet_name=1, dtype=str)
 setup_time = pd.read_excel("./semiconductor_data.xlsx", sheet_name=3, index_col=0) #index can sue
 
-# Normal
-## GA
+## PSO parameter
 population_size=50
-num_iteration =500
-  
-## PSO
+num_iteration =100
 w=0.5
 c1=2
 c2=2
@@ -41,22 +38,22 @@ for i in range(len(wip.values)): #job len (100)
 # create chromosomes(first gen)
 chromosomes = []
 for i in range(population_size):
-    chromosomes.append(Chromosome(len(jobs))) #input ()
+    chromosomes.append(Chromosome(len(jobs))) #input()
 
 # create machines
 machines=[]
 for i in range(len(tool.values)):
     machines.append(Machine(tool.iloc[i]))
 
-# initialize the velocity
-v1 = np.zeros((population_size,len(jobs)*2))
+# initialize the velocity(v1.v2 is array)
+v1 = np.zeros((population_size,len(jobs)*2))  #  initialize v to zero
 v2 =np.copy(v1)
-#-------------------- Fun fitness value -------------------------------------
+#-------------------- Fitness value Function -------------------------------------
 def fitness(chromosomes,jobs,machines):
     for k in range(len(chromosomes)):
         chromosomes[k].clear_values()
 
-        # job set_probability
+        # job set_probability (job get gene & machine ID)
         for j in range(len(jobs)):
             jobs[j].set_probability(chromosomes[k].get_probability(j)) 
 
@@ -76,9 +73,8 @@ def fitness(chromosomes,jobs,machines):
 
             machines[i].clear_job()    
     
-    # caculate targetvalue
-    for t in range(len(chromosomes)):
-        chromosomes[t].target_value= 0.01* chromosomes[t].makespan + 0.99*chromosomes[t].tardiness_num
+        # caculate target_value(w1,w2)
+        chromosomes[k].target_value= 1 * chromosomes[k].makespan + 0*chromosomes[k].tardiness_num
 
     return chromosomes
 
@@ -86,7 +82,7 @@ def fitness(chromosomes,jobs,machines):
 chromosomes=fitness(chromosomes,jobs,machines)
 #排序，依target_value
 sorted_chromosomes = sorted(chromosomes, key=lambda e:e.target_value, reverse = False) #小到大
-pbest=deepcopy(chromosomes)
+pbest=deepcopy(chromosomes) 
 gbest=deepcopy(sorted_chromosomes[0])
 
 #----------------Termination Criteria -----------------------------------
@@ -110,8 +106,10 @@ for x in range(num_iteration-1): # minus first time
                 x2=0.99999
             temp_chromosomes[i].probability[j] =x2
 
+    # reset & next 
     chromosomes=[]
     v1 =np.copy(v2)
+
     for i in range(population_size):
         chromosomes.append(temp_chromosomes[i])
     
@@ -145,6 +143,8 @@ for i in range(len(machines)):
     machines[i].sort_job()     
     machines[i].calculate_process_time(setup_time)    
 
+print("PSO_main.py")
+print(num_iteration,"代")
 print("tardiness=",gbest.tardiness_num)
 print("makespan=",gbest.makespan)
 print("target_value=",gbest.target_value)
@@ -170,21 +170,21 @@ df=[]
 for i in range(len(machines)):
     for j in range(len(machines[i].sorted_jobs)): 
 
-        if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
-            df.append(
-            dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
-            Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
-            Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
-            Recipe='broken',
-            Machine=machines[i].EQP_ID))
+        # if  machines[i].sorted_jobs[j].startTime > float(machines[i].sorted_jobs[j].R_QT)*60:
+        #     df.append(
+        #     dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
+        #     Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
+        #     Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
+        #     Recipe='broken',
+        #     Machine=machines[i].EQP_ID))
     
-        else:
-            df.append(
-            dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
-            Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
-            Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
-            Recipe=machines[i].sorted_jobs[j].RECIPE,
-            Machine=machines[i].EQP_ID))
+        # else:
+        df.append(
+        dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
+        Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
+        Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
+        Recipe=machines[i].sorted_jobs[j].RECIPE,
+        Machine=machines[i].EQP_ID))
 
 
 #呈現圖表

@@ -10,8 +10,8 @@ class Chromosome():
 
         self.makespan=0
         self.tardiness_num=0
-
         self.target_value=0
+
 
     def __str__(self): #須為字串str
         return self.probability
@@ -30,7 +30,7 @@ class Chromosome():
     def clear_values(self):
         self.makespan=0
         self.tardiness_num=0
-
+        self.target_value=0
 
 # Crossover
 def Crossover(parent_list,offspring_list,population_size,jobs_size,crossover_rate):
