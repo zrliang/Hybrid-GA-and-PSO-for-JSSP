@@ -16,14 +16,14 @@ start_import = time.process_time()
 
 # ------------initialization setting-------------
 # import data
-wip = pd.read_excel("./semiconductor_data.xlsx", sheet_name=2, dtype=str)
-eqp = pd.read_excel("./semiconductor_data.xlsx", sheet_name=0, dtype=str)
-tool = pd.read_excel("./semiconductor_data.xlsx", sheet_name=1, dtype=str)
-setup_time = pd.read_excel("./semiconductor_data.xlsx", sheet_name=3, index_col=0) #index can sue
+wip = pd.read_excel("./semiconductor_data(10,3).xlsx", sheet_name=2, dtype=str)
+eqp = pd.read_excel("./semiconductor_data(10,3).xlsx", sheet_name=0, dtype=str)
+tool = pd.read_excel("./semiconductor_data(10,3).xlsx", sheet_name=1, dtype=str)
+setup_time = pd.read_excel("./semiconductor_data(10,3).xlsx", sheet_name=3, index_col=0) #index can sue
 
 # Selection setting (roulette_wheel) 
 population_size=50  #66
-num_iteration =200
+num_iteration =100
 crossover_rate=1    #66
 mutation_rate=1     #66
 
