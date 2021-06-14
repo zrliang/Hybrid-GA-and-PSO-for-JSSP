@@ -26,7 +26,7 @@ sheet['C1'] = '代數'
 sheet['D1'] = '時間'
 
 # 實驗30次
-for z in range(2):
+for z in range(30):
     start_import = time.process_time()
     pt =180
     # ------------initialization setti 

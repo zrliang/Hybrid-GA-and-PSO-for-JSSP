@@ -28,7 +28,7 @@ sheet['D1'] = '時間'
 
 
 # 實驗30次
-for z in range(1):
+for z in range(30):
     start_import = time.process_time()
     pt =180
     # ------------initialization setting-------------
