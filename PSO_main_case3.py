@@ -28,9 +28,9 @@ sheet['D1'] = '時間'
 
 
 # 實驗30次
-for z in range(30):
+for z in range(1):
     start_import = time.process_time()
-    pt =600
+    pt =300
     # ------------initialization setting-------------
     # import data
     wip = pd.read_excel("./semiconductor_data.xlsx", sheet_name=2, dtype=str)
@@ -167,44 +167,44 @@ for z in range(30):
         machines[i].sort_job()     
         machines[i].calculate_process_time(setup_time)    
 
-    # print("PSO_main.py")
-    # print(x,"代")
-    # print("tardiness=",gbest.tardiness_num)
-    # print("makespan=",gbest.makespan)
-    # print("target_value=",gbest.target_value)
-    # print("執行時間:",process_import)
+    print("PSO_main.py")
+    print(x,"代")
+    print("tardiness=",gbest.tardiness_num)
+    print("makespan=",gbest.makespan)
+    print("target_value=",gbest.target_value)
+    print("執行時間:",process_import)
 
-    #record excel data
-    columnA = str(z+1)
-    columnB = str(gbest.makespan)
-    columnC = str(x+2)
-    columnD = str(process_import)
-    sheet.append([columnA, columnB, columnC, columnD])
+#     #record excel data
+#     columnA = str(z+1)
+#     columnB = str(gbest.makespan)
+#     columnC = str(x+2)
+#     columnD = str(process_import)
+#     sheet.append([columnA, columnB, columnC, columnD])
 
-excel_file.save('PSO_case3.xlsx')    
+# excel_file.save('PSO_case3.xlsx')    
 
 
-# #收斂圖
-# # "%d" %i
-# plt.plot([i for i in range(len(MakespanRecord))],MakespanRecord,'b') #x,y為list資料
-# plt.ylabel('target_value',fontsize=15)
-# plt.xlabel('generation',fontsize=15)
-# plt.show()
+#收斂圖
+# "%d" %i
+plt.plot([i for i in range(len(MakespanRecord))],MakespanRecord,'b') #x,y為list資料
+plt.ylabel('Makespan',fontsize=15)
+plt.xlabel('Generation',fontsize=15)
+plt.show()
 
-# #甘特圖
-# #時間限制(超過24hr:1440 分)
-# df=[]
-# for i in range(len(machines)):
-#     for j in range(len(machines[i].sorted_jobs)): 
+#甘特圖
+#時間限制(超過24hr:1440 分)
+df=[]
+for i in range(len(machines)):
+    for j in range(len(machines[i].sorted_jobs)): 
    
-#         df.append(
-#         dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
-#         Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
-#         Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
-#         Recipe=machines[i].sorted_jobs[j].RECIPE,
-#         Machine=machines[i].EQP_ID))
+        df.append(
+        dict(Task=str(machines[i].sorted_jobs[j].LOT_ID), 
+        Start='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].startTime)),
+        Finish='2020-11-07 %s'%datetime.timedelta(seconds=float(machines[i].sorted_jobs[j].endTime)),
+        Recipe=machines[i].sorted_jobs[j].RECIPE,
+        Machine=machines[i].EQP_ID))
 
 
-# #呈現圖表
-# fig1 = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", color="Recipe",text="Task")
-# fig1.show()
+#呈現圖表
+fig1 = px.timeline(df, x_start="Start", x_end="Finish", y="Machine", color="Recipe",text="Task")
+fig1.show()
